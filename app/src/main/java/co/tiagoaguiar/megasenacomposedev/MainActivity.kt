@@ -1,6 +1,7 @@
 package co.tiagoaguiar.megasenacomposedev
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -30,6 +31,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.app.RemoteInput
+import androidx.core.app.ShareCompat
 import co.tiagoaguiar.megasenacomposedev.ui.theme.MegaSenaTheme
 import kotlin.random.Random
 
@@ -47,7 +50,10 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun MainApp (){
     val context = LocalContext.current
-    val result = remember{ mutableStateOf("Resultado APARECE AQUI!") }
+    val prefs = context.getSharedPreferences("megasena", Context.MODE_PRIVATE)
+    val result = remember{
+        mutableStateOf(prefs.getString(PREFS_KEY, "") ?: "")
+    }
     val bet = remember { mutableStateOf("") }
 
     Surface(
@@ -83,7 +89,7 @@ fun MainApp (){
                         Text("Digite um número entre 6 e 15")
                     },
                     onValueChange = {
-                        bet.value = it
+                        bet.value = validateInput(it)
                     }
                 )
                 Text(
@@ -94,19 +100,42 @@ fun MainApp (){
             }
 
             Button(onClick = {
-                val res = numberGenerator(context,bet.value.toInt())
-                result.value= res
+                val numberIsValid = validateTextField(bet.value)
+                if (!numberIsValid) {
+                    Toast.makeText(
+                        context,
+                        "Digite número entre 6 e 15!",
+                        Toast.LENGTH_LONG
+                    ).show()
+                    return@Button
+                }
+                result.value = numberGenerator(bet.value.toInt())
+                saveNumberSequence(prefs, result.value)
             }) {
-                Text("Gerar números")
+                Text("Gerar Números")
             }
         }
     }
 }
+fun validateInput(input: String): String{
+    val filteredCharsinput =input.filter {
+        it in "0123456789"
+    }
+    return filteredCharsinput
+}
 
-fun numberGenerator(context: Context, qtd: Int): String {
-    var result= ""
+fun validateTextField(text: String): Boolean {
+    if (text.isEmpty()) {
+        return false
+    }
+    val qtd = text.toInt()
+    if (qtd < 6 || qtd > 15) {
+        return false
+    }
+    return true
+}
 
-    if (qtd >= 6 && qtd <= 15) {
+fun numberGenerator(qtd: Int): String {
         val numbers = mutableListOf<Int>()
 
         while (true){
@@ -118,15 +147,17 @@ fun numberGenerator(context: Context, qtd: Int): String {
             }
         }
 
-        result = numbers.joinToString(" - ")
-
-    }else{
-        Toast.makeText(context,
-            "Digite número entre 6 e 15!",
-            Toast.LENGTH_LONG).show()
-    }
-    return result
+    return numbers.joinToString(" - ")
 }
+
+fun saveNumberSequence(prefs: SharedPreferences, numberSequence: String) {
+    prefs.edit().apply{
+        putString(PREFS_KEY, numberSequence)
+        apply()
+    }
+}
+
+const val PREFS_KEY = "Key_mega"
 
 @Preview(showBackground = true)
 @Composable
