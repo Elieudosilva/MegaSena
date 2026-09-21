@@ -50,10 +50,8 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun MainApp (){
     val context = LocalContext.current
-    val prefs = context.getSharedPreferences("megasena", Context.MODE_PRIVATE)
-    val result = remember{
-        mutableStateOf(prefs.getString(PREFS_KEY, "") ?: "")
-    }
+    val prefs = PreferencesManager(context)
+    val result = remember { mutableStateOf( prefs.getData(PREFS_KEY) ) }
     val bet = remember { mutableStateOf("") }
 
     Surface(
@@ -110,7 +108,7 @@ fun MainApp (){
                     return@Button
                 }
                 result.value = numberGenerator(bet.value.toInt())
-                saveNumberSequence(prefs, result.value)
+                prefs.saveData(PREFS_KEY, result.value)
             }) {
                 Text("Gerar Números")
             }
@@ -150,12 +148,6 @@ fun numberGenerator(qtd: Int): String {
     return numbers.joinToString(" - ")
 }
 
-fun saveNumberSequence(prefs: SharedPreferences, numberSequence: String) {
-    prefs.edit().apply{
-        putString(PREFS_KEY, numberSequence)
-        apply()
-    }
-}
 
 const val PREFS_KEY = "Key_mega"
 
