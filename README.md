@@ -40,15 +40,6 @@ A aplicação possui uma tela principal onde o usuário informa a quantidade de 
 
 ---
 
-## 🎥 Demonstração
-
-Confira o aplicativo em funcionamento demonstrando a entrada da quantidade de números, a validação dos dados, a geração da aposta e a persistência do último resultado.
-
-<!-- Substitua SEU_LINK_DO_VIDEO pelo link do vídeo -->
-
-<video src="SEU_LINK_DO_VIDEO" controls="controls" style="max-width: 100%; height: auto;">
-  Seu navegador não suporta a reprodução do vídeo.
-</video>
 
 ---
 
